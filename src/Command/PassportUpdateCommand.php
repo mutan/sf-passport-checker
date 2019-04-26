@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,10 +12,12 @@ class PassportUpdateCommand extends Command
 {
     const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
 
+    private $logger;
     private $projectDir;
 
-    public function __construct($projectDir)
+    public function __construct(LoggerInterface $logger, $projectDir)
     {
+        $this->logger = $logger;
         $this->projectDir = $projectDir;
         parent::__construct();
     }
@@ -30,7 +33,12 @@ class PassportUpdateCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $this->logger->error('Test');
+
         $versionFile = $this->projectDir . implode(DIRECTORY_SEPARATOR, ['', 'var', 'data', 'version.txt']);
+        $version = null;
+
+
         //file_put_contents($versionFile, date("Y-m-d H:i:s"));
 
 

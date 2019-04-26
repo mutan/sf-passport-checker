@@ -1,0 +1,10 @@
+monolog:
+    handlers:
+        sentry:
+            type:  raven
+            dsn:   '%env(SENTRY_DSN)%'
+            level: error
+        main:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug

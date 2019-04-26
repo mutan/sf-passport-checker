@@ -1,0 +1,26 @@
+### Disabling email notifications
+#   >/dev/null 2>&1
+
+# *     *     *     *     *  command to be executed
+# -     -     -     -     -
+# |     |     |     |     |
+# |     |     |     |     +----- day of week (0 - 6) (Sunday=0)
+# |     |     |     +------- month (1 - 12)
+# |     |     +--------- day of month (1 - 31)
+# |     +----------- hour (0 - 23)
+# +------------- min (0 - 59)
+
+###
+
+# *     *       *   *   *   <command> #Runs every minute
+# 30    *       *   *   *   <command> #Runs at 30 minutes past the hour
+# 45    6       *   *   *   <command> #Runs at 6:45 am every day
+# 45    18      *   *   *   <command> #Runs at 6:45 pm every day
+# 300   1       *   *   0   <command> #Runs at 1:00 am every Sunday
+# 00    1       *   *   7   <command> #Runs at 1:00 am every Sunday
+# 00    1       *   *   Sun <command> #Runs at 1:00 am every Sunday
+# 30    8       1   *   *   <command> #Runs at 8:30 am on the first day of every month
+# 00    0-23/2  02  07  *   <command> #Runs every other hour on the 2nd of July
+
+# Загрузка, парсинг и сохранение паспортных данных
+0      */8    *      *      *       /srv/www/pd/current/bin/console app:passport:update --env=prod
