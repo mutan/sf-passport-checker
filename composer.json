@@ -4,9 +4,9 @@
     "license": "proprietary",
     "require": {
         "php": "^7.2",
-        "ext-ctype": "*",
+        "ext-ctype": "^7.2",
         "ext-curl": "^7.2",
-        "ext-iconv": "*",
+        "ext-iconv": "^7.2",
         "symfony/console": "4.2.*",
         "symfony/dotenv": "4.2.*",
         "symfony/flex": "^1.1",
