@@ -3,21 +3,19 @@
 namespace App\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PassportUpdateCommand extends Command
 {
+    const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
+
     protected function configure()
     {
         $this->setName('app:passport:update')
              ->setDescription('Download, parse and save to DB file with passport data.')
-             ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-             ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+             ->setHelp('This command allows you to download and parse file with passport data, handle that data and then save to database.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
