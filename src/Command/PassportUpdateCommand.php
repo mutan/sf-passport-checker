@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class PassportUpdateCommand extends Command
 {
     const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
-    const BATCH_INSERT = 10;
+    const BATCH_INSERT = 1000;
 
     private $em;
     private $logger;
@@ -86,12 +86,13 @@ class PassportUpdateCommand extends Command
 
             $output->writeln('Extracted.');*/
 
+            $this->executeQuery('DROP TABLE IF EXISTS passport_new');
             $this->executeQuery(
                 'CREATE TABLE passport_new (
-                        "series" varchar(4) NOT NULL,
-                        "number" varchar(6) NOT NULL,
-                        PRIMARY KEY ("series", "number")
-                     )'
+                        `series` varchar(4) NOT NULL,
+                        `number` varchar(6) NOT NULL,
+                        PRIMARY KEY (`series`, `number`)
+                    )'
             );
 
             $processed = 0;
@@ -145,9 +146,8 @@ class PassportUpdateCommand extends Command
         }
         $toInsert = rtrim($toInsert, ', ');
 
-        $this->em->getConnection()->exec(
-            "INSERT INTO passport_new (series, number) VALUES {$toInsert} ON CONFLICT DO NOTHING"
-        );
+        $this->executeQuery("INSERT INTO passport_new (series, number) VALUES {$toInsert}");
+        //TODO ON CONFLICT DO NOTHING
     }
 
     /**
@@ -159,7 +159,7 @@ class PassportUpdateCommand extends Command
     {
         $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt;
     }
 
     /**
