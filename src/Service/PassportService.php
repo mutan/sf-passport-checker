@@ -54,7 +54,7 @@ class PassportService
     {
         $file = $this->getSanitizedPath() . $name;
         if (!file_exists($file)) {
-            if (touch($file)) {
+            if (!touch($file)) {
                 throw new Exception('Cannot make file.');
             }
         }
