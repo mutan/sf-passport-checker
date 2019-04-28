@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class PassportUpdateCommand extends Command
 {
     const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
-    const BATCH_INSERT = 1000;
+    const BATCH_INSERT = 10000;
 
     private $em;
     private $logger;
@@ -146,8 +146,7 @@ class PassportUpdateCommand extends Command
         }
         $toInsert = rtrim($toInsert, ', ');
 
-        $this->executeQuery("INSERT INTO passport_new (series, number) VALUES {$toInsert}");
-        //TODO ON CONFLICT DO NOTHING
+        $this->executeQuery("INSERT INTO passport_new (series, number) VALUES {$toInsert} ON CONFLICT DO NOTHING");
     }
 
     /**
