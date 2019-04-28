@@ -4,6 +4,7 @@ namespace App\Service;
 
 use Exception;
 use Psr\Log\LoggerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class PassportService
 {
@@ -13,11 +14,13 @@ class PassportService
     const EXPIRED_PASSPORTS_BZ2_FILE = 'expired_passports.csv.bz2';
     const EXPIRED_PASSPORTS_SCV_FILE = 'expired_passports.csv';
 
+    private $em;
     private $logger;
     private $projectDir;
 
-    public function __construct(LoggerInterface $logger, $projectDir)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, $projectDir)
     {
+        $this->em = $em;
         $this->logger = $logger;
         $this->projectDir = $projectDir;
     }
