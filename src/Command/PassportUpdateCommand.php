@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PassportUpdateCommand extends Command
 {
     const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
-    const BATCH_INSERT = 10000;
+    const BATCH_INSERT = 20000;
 
     private $em;
     private $logger;
@@ -77,6 +77,7 @@ class PassportUpdateCommand extends Command
                 $this->bunzip2($bz2File, $csvFile);
 
                 $output->writeln('Extracted.');
+                $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
 
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
                 $this->executeQuery(
@@ -86,7 +87,6 @@ class PassportUpdateCommand extends Command
                         PRIMARY KEY (series, number)
                     )'
                 );
-                $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
             }
         }
 
