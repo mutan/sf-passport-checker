@@ -2,10 +2,10 @@
 
 namespace App\Command;
 
-use App\Service\PassportService;
 use Exception;
-use Psr\Log\LoggerInterface;
 use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+use App\Service\PassportService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
