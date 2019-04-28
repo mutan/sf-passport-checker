@@ -43,46 +43,54 @@ class PassportUpdateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $versionFile = $this->passportService->getVersionFile();
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
         $version = $this->passportService->getVersion();
-
-        $headers = get_headers(self::SOURCE_URL, 1);
-        if (!is_array($headers) || !array_key_exists('Last-Modified', $headers)) {
-            throw new Exception('Expired passports: wrong header.');
+        $progress = $this->passportService->getProgress();
+        if (!$progress) {
+            $progress = $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
 
-        /* Check version without downloading file */
-        if ($headers['Last-Modified'] != $version) {
-            /* Update version */
-            file_put_contents($versionFile, $headers['Last-Modified']);
-
-            /* Download and save file */
-            $output->writeln('Downloading...');
-            $filePointer = fopen($bz2File, 'wb');
-            $client = new Client();
-            $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
-            fclose($filePointer);
-            if (200 != $response->getStatusCode()) {
-                throw new Exception('Expired passports: wrong response code.');
+        if ($progress == PassportService::PROGRESS_COMPLETED) {
+            $headers = get_headers(self::SOURCE_URL, 1);
+            if (!is_array($headers) || !array_key_exists('Last-Modified', $headers)) {
+                throw new Exception('Expired passports: wrong header.');
             }
 
-            /* Extract csv file from archive */
-            $output->writeln('Extracting...');
-            $this->bunzip2($bz2File, $csvFile);
+            /* Check version without downloading file */
+            if ($headers['Last-Modified'] != $version) {
+                /* Update version */
+                $this->passportService->setVersion($headers['Last-Modified']);
 
-            $output->writeln('Extracted.');
+                /* Download and save file */
+                $output->writeln('Downloading...');
+                $filePointer = fopen($bz2File, 'wb');
+                $client = new Client();
+                $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
+                fclose($filePointer);
+                if (200 != $response->getStatusCode()) {
+                    throw new Exception('Expired passports: wrong response code.');
+                }
 
-            $this->executeQuery('DROP TABLE IF EXISTS passport_new');
-            $this->executeQuery(
-                'CREATE TABLE passport_new (
+                /* Extract csv file from archive */
+                $output->writeln('Extracting...');
+                $this->bunzip2($bz2File, $csvFile);
+
+                $output->writeln('Extracted.');
+
+                $this->executeQuery('DROP TABLE IF EXISTS passport_new');
+                $this->executeQuery(
+                    'CREATE TABLE passport_new (
                         series character varying(4) NOT NULL,
                         number character varying(6) NOT NULL,
                         PRIMARY KEY (series, number)
                     )'
-            );
+                );
+                $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
+            }
+        }
 
+        if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
             $output->writeln('Inserting to database...');
             if (($handle = fopen($csvFile, 'r')) !== false) {
@@ -115,6 +123,7 @@ class PassportUpdateCommand extends Command
             } else {
                 throw new Exception('Unable to open csv file');
             }
+            $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
     }
 

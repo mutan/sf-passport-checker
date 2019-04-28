@@ -11,8 +11,12 @@ class PassportService
     const DATA_PATH = '/var/data/passports/'; # starting from 'kernel.project-dir'
 
     const VERSION_FILE = 'version.txt';
+    const PROGRESS_FILE = 'progress.txt';
     const EXPIRED_PASSPORTS_BZ2_FILE = 'expired_passports.csv.bz2';
     const EXPIRED_PASSPORTS_SCV_FILE = 'expired_passports.csv';
+
+    const PROGRESS_COMPLETED = 'completed';
+    const PROGRESS_PROCESSING = 'processing';
 
     private $em;
     private $logger;
@@ -68,9 +72,53 @@ class PassportService
      * @return string
      * @throws Exception
      */
+    public function getProgressFile()
+    {
+        return $this->getFile(PassportService::PROGRESS_FILE);
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function getVersion(): string
     {
         return file_get_contents($this->getVersionFile());
+    }
+
+    /**
+     * @param string $text
+     * @return bool
+     * @throws Exception
+     */
+    public function setVersion(string $text): bool
+    {
+        if (!file_put_contents($this->getVersionFile(), $text)) {
+            throw new Exception('Cannot write version to file');
+        }
+        return $text;
+    }
+
+    /**
+     * @return string
+     * @throws Exception
+     */
+    public function getProgress(): string
+    {
+        return file_get_contents($this->getProgressFile());
+    }
+
+    /**
+     * @param string $text
+     * @return string
+     * @throws Exception
+     */
+    public function setProgress(string $text): string
+    {
+        if (!file_put_contents($this->getProgressFile(), $text)) {
+            throw new Exception('Cannot write progress to file');
+        }
+        return $text;
     }
 
     /**
