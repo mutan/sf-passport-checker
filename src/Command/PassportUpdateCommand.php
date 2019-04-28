@@ -18,14 +18,12 @@ class PassportUpdateCommand extends Command
 
     private $em;
     private $logger;
-    private $projectDir;
     private $passportService;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, PassportService $passportService, $projectDir)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, PassportService $passportService)
     {
         $this->em = $em;
         $this->logger = $logger;
-        $this->projectDir = $projectDir;
         $this->passportService = $passportService;
         parent::__construct();
     }
@@ -56,7 +54,7 @@ class PassportUpdateCommand extends Command
         }
 
         /* Check version without downloading file */
-        if ($headers['Last-Modified'] != $version) { // !=
+        if ($headers['Last-Modified'] != $version) {
             /* Update version */
             file_put_contents($versionFile, $headers['Last-Modified']);
 
