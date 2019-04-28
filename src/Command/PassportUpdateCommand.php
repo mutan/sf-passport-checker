@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Service\PassportService;
 use Exception;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\Client;
@@ -22,12 +23,14 @@ class PassportUpdateCommand extends Command
     private $em;
     private $logger;
     private $projectDir;
+    private $passportService;
 
-    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, $projectDir)
+    public function __construct(EntityManagerInterface $em, LoggerInterface $logger, PassportService $passportService, $projectDir)
     {
         $this->em = $em;
         $this->logger = $logger;
         $this->projectDir = $projectDir;
+        $this->passportService = $passportService;
         parent::__construct();
     }
 
@@ -48,17 +51,10 @@ class PassportUpdateCommand extends Command
     {
         //$io = new SymfonyStyle($input, $output);
 
-        $path = $this->getSanitizedPath('/var/data/passports/');
-        if (!file_exists($path) ){
-            if (!mkdir($path, 0755, true)) {
-                throw new Exception('Expired passports: cannot create directory.');
-            }
-        }
-
-        $versionFilePath = $this->getOrCreateFilePath('version.txt', $path);
-        $bz2FilePath = $this->getOrCreateFilePath('expired_passports.csv.bz2', $path);
-        $csvFilePath = $this->getOrCreateFilePath('expired_passports.csv', $path);
-        $version = file_get_contents($versionFilePath);
+        $versionFile = $this->passportService->getVersionFile();
+        $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
+        $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
+        $version = $this->passportService->getVersion();
 
         $headers = get_headers(self::SOURCE_URL, 1);
         if (!is_array($headers) || !array_key_exists('Last-Modified', $headers)) {
@@ -66,13 +62,13 @@ class PassportUpdateCommand extends Command
         }
 
         /* Check version without downloading file */
-        if ($headers['Last-Modified'] == $version) { // !=
+        if ($headers['Last-Modified'] != $version) { // !=
             /* Update version */
-            file_put_contents($versionFilePath, $headers['Last-Modified']);
+            file_put_contents($versionFile, $headers['Last-Modified']);
 
             /* Download and save file */
             /*$output->writeln('Downloading...');
-            $filePointer = fopen($bz2FilePath, 'wb');
+            $filePointer = fopen($bz2File, 'wb');
             $client = new Client();
             $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
             fclose($filePointer);
@@ -82,7 +78,7 @@ class PassportUpdateCommand extends Command
 
             /* Extract csv file from archive */
             /*$output->writeln('Extracting...');
-            $this->bunzip2($bz2FilePath, $csvFilePath);
+            $this->bunzip2($bz2File, $csvFile);
 
             $output->writeln('Extracted.');*/
 
@@ -97,7 +93,7 @@ class PassportUpdateCommand extends Command
 
             $processed = 0;
             $output->writeln('Inserting to database...');
-            if (($handle = fopen($csvFilePath, 'r')) !== false) {
+            if (($handle = fopen($csvFile, 'r')) !== false) {
                 fgets($handle); // skip first line with columns headers
                 $passportList = [];
                 while ($str = fgets($handle)) {
@@ -122,7 +118,7 @@ class PassportUpdateCommand extends Command
                 $this->em->getConnection()->exec("ALTER TABLE passport RENAME TO passport_old");
                 $this->em->getConnection()->exec("ALTER TABLE passport_new RENAME TO passport");
                 $this->em->getConnection()->exec("DROP TABLE passport_old");
-                unlink($csvFilePath);
+                unlink($csvFile);
                 $output->writeln("Complete $processed records");
             } else {
                 throw new Exception('Unable to open csv file');
@@ -187,25 +183,5 @@ class PassportUpdateCommand extends Command
         fclose ($out_file);
 
         return true;
-    }
-
-    public function getSanitizedPath(string $path): string
-    {
-        $pieces = array_filter(explode('/', $path));
-        return $this->projectDir . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $pieces) . DIRECTORY_SEPARATOR;
-    }
-
-    /**
-     * @param string $name
-     * @param string $path
-     * @return string
-     */
-    protected function getOrCreateFilePath(string $name, string $path): string
-    {
-        $filePath = $path . $name;
-        if (!file_exists($filePath)) {
-            touch($filePath);
-        }
-        return $filePath;
     }
 }
