@@ -90,10 +90,10 @@ class PassportService
 
     /**
      * @param string $text
-     * @return bool
+     * @return string
      * @throws Exception
      */
-    public function setVersion(string $text): bool
+    public function setVersion(string $text): string
     {
         if (!file_put_contents($this->getVersionFile(), $text)) {
             throw new Exception('Cannot write version to file.');
