@@ -89,9 +89,9 @@ class PassportUpdateCommand extends Command
             $this->executeQuery('DROP TABLE IF EXISTS passport_new');
             $this->executeQuery(
                 'CREATE TABLE passport_new (
-                        `series` varchar(4) NOT NULL,
-                        `number` varchar(6) NOT NULL,
-                        PRIMARY KEY (`series`, `number`)
+                        series character varying(4) NOT NULL,
+                        number character varying(6) NOT NULL,
+                        PRIMARY KEY (series, number)
                     )'
             );
 

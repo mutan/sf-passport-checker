@@ -21,17 +21,7 @@ class Passport
      */
     private $number;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true)
-     */
-    private $status;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $checkDate;
-
-    public function getSeries(): ?string
+    public function getSeries(): string
     {
         return $this->series;
     }
@@ -43,7 +33,7 @@ class Passport
         return $this;
     }
 
-    public function getNumber(): ?string
+    public function getNumber(): string
     {
         return $this->number;
     }
@@ -51,31 +41,6 @@ class Passport
     public function setNumber(string $number): self
     {
         $this->number = $number;
-
-        return $this;
-    }
-
-    public function getStatus(): ?bool
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?bool $status): self
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getCheckDate(): ?\DateTimeInterface
-    {
-        return $this->checkDate;
-    }
-
-    public function setCheckDate(?\DateTimeInterface $checkDate): self
-    {
-        $this->checkDate = $checkDate;
-
         return $this;
     }
 }
