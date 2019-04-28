@@ -54,7 +54,9 @@ class PassportService
     {
         $file = $this->getSanitizedPath() . $name;
         if (!file_exists($file)) {
-            touch($file);
+            if (touch($file)) {
+                throw new Exception('Cannot make file.');
+            }
         }
         return $file;
     }
@@ -94,7 +96,7 @@ class PassportService
     public function setVersion(string $text): bool
     {
         if (!file_put_contents($this->getVersionFile(), $text)) {
-            throw new Exception('Cannot write version to file');
+            throw new Exception('Cannot write version to file.');
         }
         return $text;
     }
@@ -116,7 +118,7 @@ class PassportService
     public function setProgress(string $text): string
     {
         if (!file_put_contents($this->getProgressFile(), $text)) {
-            throw new Exception('Cannot write progress to file');
+            throw new Exception('Cannot write progress to file.');
         }
         return $text;
     }
