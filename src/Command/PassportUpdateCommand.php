@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use DateTime;
 use Exception;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
@@ -43,6 +44,8 @@ class PassportUpdateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $output->writeln('Script started at ' . (new DateTime())->format('Y-m-d H:i:s'));
+
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
         $version = $this->passportService->getVersion();
