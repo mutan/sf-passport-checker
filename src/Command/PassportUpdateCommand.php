@@ -7,13 +7,9 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use GuzzleHttp\Client;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Common\Persistence\ObjectManager;
-use Symfony\Bridge\Doctrine\ManagerRegistry;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 class PassportUpdateCommand extends Command
 {
@@ -49,8 +45,6 @@ class PassportUpdateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        //$io = new SymfonyStyle($input, $output);
-
         $versionFile = $this->passportService->getVersionFile();
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
@@ -67,20 +61,20 @@ class PassportUpdateCommand extends Command
             file_put_contents($versionFile, $headers['Last-Modified']);
 
             /* Download and save file */
-            /*$output->writeln('Downloading...');
+            $output->writeln('Downloading...');
             $filePointer = fopen($bz2File, 'wb');
             $client = new Client();
             $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
             fclose($filePointer);
             if (200 != $response->getStatusCode()) {
                 throw new Exception('Expired passports: wrong response code.');
-            }*/
+            }
 
             /* Extract csv file from archive */
-            /*$output->writeln('Extracting...');
+            $output->writeln('Extracting...');
             $this->bunzip2($bz2File, $csvFile);
 
-            $output->writeln('Extracted.');*/
+            $output->writeln('Extracted.');
 
             $this->executeQuery('DROP TABLE IF EXISTS passport_new');
             $this->executeQuery(

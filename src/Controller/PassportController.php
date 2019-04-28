@@ -29,14 +29,13 @@ class PassportController extends AbstractController
      * @param Request $request
      * @param PassportService $passportService
      * @return JsonResponse
+     * @throws Exception
      */
     public function checkAction(Request $request, PassportService $passportService)
     {
+        $data = $request->request->get("data");
 
 
-        $data = $request->get('data');
-        
-        dump($data); die('ok');
         if (is_scalar($data)) {
             $data = @json_decode($data, true);
         }
@@ -44,6 +43,15 @@ class PassportController extends AbstractController
         if (is_array($data)) {
             $result = $passportService->check($data);
         }
+
+        /*if (!is_string($series) ||
+            !is_string($number) ||
+            !preg_match('/\d{4}/', $series) ||
+            !preg_match('/\d{6}/', $number)
+        ) {
+            throw new Exception('Wrong format: series must be 4-digit string, and number must be 6-digit string');
+        }*/
+
         return $this->json($result);
     }
 }
