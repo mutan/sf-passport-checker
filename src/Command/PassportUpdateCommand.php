@@ -7,13 +7,17 @@ use Exception;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use App\Service\PassportService;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Command\LockableTrait;
 
 class PassportUpdateCommand extends Command
 {
+    use LockableTrait;
+
     const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
     const BATCH_INSERT = 20000;
 
@@ -39,11 +43,17 @@ class PassportUpdateCommand extends Command
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|void|null
+     * @return int|null
+     * @throws DBALException
      * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!$this->lock()) {
+            $output->writeln('The command is already running in another process.');
+            return false;
+        }
+
         $output->writeln('Script started at ' . (new DateTime())->format('Y-m-d H:i:s'));
 
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
@@ -128,6 +138,8 @@ class PassportUpdateCommand extends Command
             }
             $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
+        $this->release();
+        return true;
     }
 
     /**

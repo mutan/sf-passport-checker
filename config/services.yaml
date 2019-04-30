@@ -28,3 +28,13 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    app.monolog.processor.memory:
+        class: Monolog\Processor\MemoryPeakUsageProcessor
+        tags:
+            - { name: monolog.processor }
+
+    App\Command\PassportUpdateCommand:
+        tags:
+            - { name: monolog.logger, channel: command }
+            - { name: app.monolog.processor.memory }

@@ -20,7 +20,8 @@ monolog:
             level: debug
         console:
             type:  console
+            process_psr_3_messages: false
             verbosity_levels:
                 VERBOSITY_VERBOSE: INFO
                 VERBOSITY_VERY_VERBOSE: DEBUG
-            channels: ["!api"]
+            channels: ['!event', '!doctrine']
