@@ -50,11 +50,11 @@ class PassportUpdateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$this->lock()) {
-            $output->writeln('The command is already running in another process.');
+            $this->logger->info('The command is already running in another process.');
             return false;
         }
 
-        $output->writeln('Script started at ' . (new DateTime())->format('Y-m-d H:i:s'));
+        $this->logger->info('Script started at ' . (new DateTime())->format('Y-m-d H:i:s'));
 
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);

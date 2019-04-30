@@ -8,3 +8,10 @@ monolog:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
+        console:
+            type:  console
+            process_psr_3_messages: false
+            verbosity_levels:
+                VERBOSITY_NORMAL: INFO
+                VERBOSITY_VERBOSE: DEBUG
+            channels: ['!event', '!doctrine']
