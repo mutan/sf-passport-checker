@@ -76,7 +76,7 @@ class PassportUpdateCommand extends Command
                 $this->passportService->setVersion($headers['Last-Modified']);
 
                 /* Download and save file */
-                $output->writeln('Downloading...');
+                $this->logger->info('Downloading archive file...');
                 $filePointer = fopen($bz2File, 'wb');
                 $client = new Client();
                 $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
@@ -86,11 +86,13 @@ class PassportUpdateCommand extends Command
                 }
 
                 /* Extract csv file from archive */
-                $output->writeln('Extracting...');
+                $this->logger->info('Extracting archive file...');
                 $this->bunzip2($bz2File, $csvFile);
-
-                $output->writeln('Extracted.');
-                $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
+                $this->logger->info('Extracted.');
+                if (file_exists($bz2File)) {
+                    unlink($bz2File);
+                }
+                $this->logger->info('Archive file deleted.');
 
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
                 $this->executeQuery(
@@ -100,12 +102,13 @@ class PassportUpdateCommand extends Command
                         PRIMARY KEY (series, number)
                     )'
                 );
+                $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
             }
         }
 
         if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
-            $output->writeln('Inserting to database...');
+            $this->logger->info('Inserting to database...');
             if (($handle = fopen($csvFile, 'r')) !== false) {
                 fgets($handle); // skip first line with columns headers
                 $passportList = [];
@@ -131,8 +134,10 @@ class PassportUpdateCommand extends Command
                 $this->em->getConnection()->exec("ALTER TABLE passport RENAME TO passport_old");
                 $this->em->getConnection()->exec("ALTER TABLE passport_new RENAME TO passport");
                 $this->em->getConnection()->exec("DROP TABLE passport_old");
-                unlink($csvFile);
-                $output->writeln("Complete $processed records");
+                if (file_exists($csvFile)) {
+                    unlink($csvFile);
+                }
+                $this->logger->info("Complete $processed records.");
             } else {
                 throw new Exception('Unable to open csv file');
             }

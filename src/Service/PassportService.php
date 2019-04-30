@@ -41,6 +41,7 @@ class PassportService
             if (!mkdir($path, 0755, true)) {
                 throw new Exception('Expired passports: cannot create data directory.');
             }
+            $this->logger->info('Created directory: ' . $path);
         }
         return $path;
     }
@@ -57,6 +58,7 @@ class PassportService
             if (!touch($file)) {
                 throw new Exception('Cannot make file.');
             }
+            $this->logger->info('Created file: ' . $name);
         }
         return $file;
     }
@@ -98,6 +100,7 @@ class PassportService
         if (!file_put_contents($this->getVersionFile(), $text)) {
             throw new Exception('Cannot write version to file.');
         }
+        $this->logger->info('Version set to: ' . $text);
         return $text;
     }
 
@@ -120,6 +123,7 @@ class PassportService
         if (!file_put_contents($this->getProgressFile(), $text)) {
             throw new Exception('Cannot write progress to file.');
         }
+        $this->logger->info('Progress set to: ' . $text);
         return $text;
     }
 
