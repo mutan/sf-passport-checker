@@ -94,14 +94,10 @@ class PassportUpdateCommand extends Command
                 }
                 $this->logger->info('Archive file deleted.');
 
+                $this->executeQuery('ALTER DATABASE passport_checker SET random_page_cost=1.4;');
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
-                $this->executeQuery(
-                    'CREATE TABLE passport_new (
-                        series character varying(4) NOT NULL,
-                        number character varying(6) NOT NULL,
-                        PRIMARY KEY (series, number)
-                    )'
-                );
+                $this->executeQuery('CREATE TABLE passport_new (serialnumber bigint NOT NULL UNIQUE)' );
+                //$this->executeQuery('CREATE INDEX ind_sn ON passport_new USING btree (serialnumber)');
                 $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
             }
         }
@@ -115,7 +111,7 @@ class PassportUpdateCommand extends Command
                 while ($str = fgets($handle)) {
                     $data = explode(',', trim($str));
                     if (is_numeric($data[0]) && is_numeric($data[1])) {
-                        $passportList[] = array_slice($data, 0, 2);
+                        $passportList[] = intval($data[0] . $data[1]);
                         if (count($passportList) >= self::BATCH_INSERT) {
                             $this->flushPassportData($passportList);
                             $processed += count($passportList);
@@ -159,11 +155,11 @@ class PassportUpdateCommand extends Command
 
         $toInsert = '';
         foreach ($data as $item) {
-            $toInsert .= "('{$item[0]}', '{$item[1]}'), ";
+            $toInsert .= "(" . $item . "), ";
         }
         $toInsert = rtrim($toInsert, ', ');
 
-        $this->executeQuery("INSERT INTO passport_new (series, number) VALUES {$toInsert} ON CONFLICT DO NOTHING");
+        $this->executeQuery("INSERT INTO passport_new (serialnumber) VALUES {$toInsert} ON CONFLICT DO NOTHING");
     }
 
     /**
