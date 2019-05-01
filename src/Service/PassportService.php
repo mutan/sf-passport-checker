@@ -6,6 +6,9 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * БНП – база недействительный паспортов
+ */
 class PassportService
 {
     const DATA_PATH = '/var/data/passports/'; # starting from 'kernel.project-dir'
@@ -30,6 +33,7 @@ class PassportService
     }
 
     /**
+     * Конвертирует строку из константы DATA_PATH в валидный путь для текущей ОС
      * @return string
      * @throws Exception
      */
@@ -47,6 +51,8 @@ class PassportService
     }
 
     /**
+     * Возвращает путь к файлу по его имени
+     * Если файл не существует, создает его
      * @param string $name
      * @return string
      * @throws Exception
@@ -64,24 +70,27 @@ class PassportService
     }
 
     /**
+     * Получить путь к файлу, содержащему версию БНП
      * @return string
      * @throws Exception
      */
-    public function getVersionFile()
+    public function getVersionFile(): string
     {
         return $this->getFile(PassportService::VERSION_FILE);
     }
 
     /**
+     * Получить путь к файлу, содержащему прогресс обработки БНП
      * @return string
      * @throws Exception
      */
-    public function getProgressFile()
+    public function getProgressFile(): string
     {
         return $this->getFile(PassportService::PROGRESS_FILE);
     }
 
     /**
+     * Получить версию БНП
      * @return string
      * @throws Exception
      */
@@ -91,6 +100,7 @@ class PassportService
     }
 
     /**
+     * Установить версию БНП
      * @param string $text
      * @return string
      * @throws Exception
@@ -105,6 +115,7 @@ class PassportService
     }
 
     /**
+     * Получить версию прогресса обработки БНП
      * @return string
      * @throws Exception
      */
@@ -114,6 +125,7 @@ class PassportService
     }
 
     /**
+     * Установить версию прогресса обработки БНП
      * @param string $text
      * @return string
      * @throws Exception
@@ -128,10 +140,11 @@ class PassportService
     }
 
     /**
+     * Проверить массив паспортов на недействительность
      * @param array $data
      * @return array
      */
-    public function check(array $data)
+    public function check(array $data): array
     {
 
 

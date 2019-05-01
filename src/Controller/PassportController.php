@@ -25,6 +25,8 @@ class PassportController extends AbstractController
     }
 
     /**
+     * get [ ["1234", "123456"] ];
+     * return [ ["1234","123456"] ];
      * @Route("/check", name="passport_check", methods={"POST"})
      * @param Request $request
      * @param PassportService $passportService
@@ -35,13 +37,17 @@ class PassportController extends AbstractController
     {
         $data = $request->request->get("data");
 
-
-        if (is_scalar($data)) {
-            $data = @json_decode($data, true);
+        if (!is_scalar($data)) {
+            throw new Exception('Wrong request format.');
         }
-        $result = [];
-        if (is_array($data)) {
-            $result = $passportService->check($data);
+
+        $data = json_decode($data, true);
+        if (!$data) {
+            throw new Exception('Not valid json.');
+        }
+
+        if (!is_array($data)) {
+            throw new Exception('Data must be an array.');
         }
 
         /*if (!is_string($series) ||
@@ -52,6 +58,7 @@ class PassportController extends AbstractController
             throw new Exception('Wrong format: series must be 4-digit string, and number must be 6-digit string');
         }*/
 
+        $result = $passportService->check($data);
         return $this->json($result);
     }
 }
