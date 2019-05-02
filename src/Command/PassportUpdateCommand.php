@@ -155,7 +155,7 @@ class PassportUpdateCommand extends Command
 
         $toInsert = '';
         foreach ($data as $item) {
-            $toInsert .= "(" . $item . "), ";
+            $toInsert .= "('{$item}'), ";
         }
         $toInsert = rtrim($toInsert, ', ');
 
