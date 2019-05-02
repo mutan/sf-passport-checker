@@ -137,6 +137,8 @@ class PassportUpdateCommand extends Command
             } else {
                 throw new Exception('Unable to open csv file');
             }
+
+            /* Update progress */
             $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
         $this->release();
