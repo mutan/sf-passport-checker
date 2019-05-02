@@ -26,9 +26,24 @@ class PassportController extends AbstractController
     }
 
     /**
-     * // TODO
-     * get [ ["1234", "123456"] ];
-     * return [ ["1234","123456"] ];
+     * request
+     * {
+     *   "data": [
+     *     ["6805", "301022"],
+     *     ["2503", "739717"]
+     *   ]
+     * }
+     * response
+     * [
+     *   {
+     *     "series": "2503",
+     *     "number": "739717"
+     *   },
+     *   {
+     *     "series": "0004",
+     *     "number": "000040"
+     *   }
+     * ]
      * @Route("/check", name="passport_check", methods={"POST"})
      * @param Request $request
      * @param PassportService $passportService

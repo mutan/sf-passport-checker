@@ -147,18 +147,6 @@ class PassportService
 
     public function stringToArray(string $seriesnumber): array
     {
-
-
-        if (strlen($seriesnumber) < 10) {
-            $seriesnumber .= str_repeat('0', 10 - strlen($seriesnumber));
-        }
-        dump([
-            'series' => substr($seriesnumber, 0, 4),
-            'number' => substr($seriesnumber, -6, 6)
-        ]); die('ok');
-
-
-        
         return [
             'series' => substr($seriesnumber, 0, 4),
             'number' => substr($seriesnumber, -6, 6)
