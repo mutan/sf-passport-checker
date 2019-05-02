@@ -72,32 +72,32 @@ class PassportUpdateCommand extends Command
 
             /* Check version without downloading file */
             if ($headers['Last-Modified'] != $version) {
-                /* Update version */
-                $this->passportService->setVersion($headers['Last-Modified']);
-
                 /* Download and save file */
-                /*-$this->logger->info('Downloading archive file...');
+                $this->logger->info('Downloading archive file...');
                 $filePointer = fopen($bz2File, 'wb');
                 $client = new Client();
                 $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
                 fclose($filePointer);
                 if (200 != $response->getStatusCode()) {
                     throw new Exception('Expired passports: wrong response code.');
-                }*/
+                }
 
                 /* Extract csv file from archive */
-                /*$this->logger->info('Extracting archive file...');
+                $this->logger->info('Extracting archive file...');
                 $this->bunzip2($bz2File, $csvFile);
                 $this->logger->info('Extracted.');
                 if (file_exists($bz2File)) {
                     unlink($bz2File);
                 }
-                $this->logger->info('Archive file deleted.');*/
+                $this->logger->info('Archive file deleted.');
 
-                $this->executeQuery('ALTER DATABASE passport_checker SET random_page_cost=1.4;');
+                $this->executeQuery('ALTER DATABASE passport SET random_page_cost=1.4;');
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
-                $this->executeQuery('CREATE TABLE passport_new (serialnumber bigint NOT NULL UNIQUE)' );
-                //$this->executeQuery('CREATE INDEX ind_sn ON passport_new USING btree (serialnumber)');
+                $this->executeQuery('CREATE TABLE passport_new (seriesnumber character varying(10) NOT NULL UNIQUE)' );
+                //$this->executeQuery('CREATE INDEX ind_sn ON passport_new USING btree (seriesnumber)');
+
+                /* Update version and progress */
+                $this->passportService->setVersion($headers['Last-Modified']);
                 $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
             }
         }
@@ -111,7 +111,7 @@ class PassportUpdateCommand extends Command
                 while ($str = fgets($handle)) {
                     $data = explode(',', trim($str));
                     if (is_numeric($data[0]) && is_numeric($data[1])) {
-                        $passportList[] = $this->passportService->arrayToInt($data);
+                        $passportList[] = $this->passportService->arrayToString($data);
                         if (count($passportList) >= self::BATCH_INSERT) {
                             $this->flushPassportData($passportList);
                             $processed += count($passportList);
@@ -131,7 +131,7 @@ class PassportUpdateCommand extends Command
                 $this->em->getConnection()->exec("ALTER TABLE passport_new RENAME TO passport");
                 $this->em->getConnection()->exec("DROP TABLE passport_old");
                 if (file_exists($csvFile)) {
-                    //unlink($csvFile);
+                    unlink($csvFile);
                 }
                 $this->logger->info("Complete $processed records.");
             } else {
@@ -159,7 +159,7 @@ class PassportUpdateCommand extends Command
         }
         $toInsert = rtrim($toInsert, ', ');
 
-        $this->executeQuery("INSERT INTO passport_new (serialnumber) VALUES {$toInsert} ON CONFLICT DO NOTHING");
+        $this->executeQuery("INSERT INTO passport_new (seriesnumber) VALUES {$toInsert} ON CONFLICT DO NOTHING");
     }
 
     /**

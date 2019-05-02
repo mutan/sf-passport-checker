@@ -140,29 +140,28 @@ class PassportService
         return $text;
     }
 
-    public function arrayToInt(array $data): int
+    public function arrayToString(array $data): string
     {
-        dump($data[0] . $data[1]);
-        dump(intval($data[0] . $data[1], 10)); die('ok');
-        return intval($data[0] . $data[1]);
+        return strval($data[0] . $data[1]);
     }
 
-    public function strToArray(string $serialnumber): array
+    public function stringToArray(string $seriesnumber): array
     {
 
-        if (strlen($serialnumber) < 10) {
-            $serialnumber .= str_repeat('0', 10 - strlen($serialnumber));
+
+        if (strlen($seriesnumber) < 10) {
+            $seriesnumber .= str_repeat('0', 10 - strlen($seriesnumber));
         }
         dump([
-            'series' => substr($serialnumber, 0, 4),
-            'number' => substr($serialnumber, -6, 6)
+            'series' => substr($seriesnumber, 0, 4),
+            'number' => substr($seriesnumber, -6, 6)
         ]); die('ok');
 
 
         
         return [
-            'series' => substr($serialnumber, 0, 4),
-            'number' => substr($serialnumber, -6, 6)
+            'series' => substr($seriesnumber, 0, 4),
+            'number' => substr($seriesnumber, -6, 6)
         ];
     }
 
@@ -186,18 +185,18 @@ class PassportService
             ) {
                 throw new InvalidArgumentException('Wrong format: series must be 4-digit string, and number must be 6-digit string');
             }
-            $serialnumber = $this->arrayToInt($item);
-            dump($serialnumber); die('ok');
-            $where .= " OR (\"serialnumber\" = '$serialnumber')";
+            $seriesnumber = $this->arrayToString($item);
+            dump($seriesnumber); die('ok');
+            $where .= " OR (\"seriesnumber\" = '$seriesnumber')";
         }
         if ($where) {
             $limit = count($data);
             $where = ltrim($where, "OR ");
-            $sql = "SELECT serialnumber FROM passport WHERE {$where} LIMIT {$limit}";
+            $sql = "SELECT seriesnumber FROM passport WHERE {$where} LIMIT {$limit}";
             dump($sql); die('ok');
             if ($resultItems = $this->em->getConnection()->fetchAll($sql)) {
                 foreach ($resultItems as $resultItem) {
-                    $result[] = $this->strToArray($resultItem['serialnumber']);
+                    $result[] = $this->strToArray($resultItem['seriesnumber']);
                 }
             }
         }
