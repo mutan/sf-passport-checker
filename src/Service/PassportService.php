@@ -186,21 +186,18 @@ class PassportService
                 throw new InvalidArgumentException('Wrong format: series must be 4-digit string, and number must be 6-digit string');
             }
             $seriesnumber = $this->arrayToString($item);
-            dump($seriesnumber); die('ok');
             $where .= " OR (\"seriesnumber\" = '$seriesnumber')";
         }
         if ($where) {
             $limit = count($data);
             $where = ltrim($where, "OR ");
             $sql = "SELECT seriesnumber FROM passport WHERE {$where} LIMIT {$limit}";
-            dump($sql); die('ok');
             if ($resultItems = $this->em->getConnection()->fetchAll($sql)) {
                 foreach ($resultItems as $resultItem) {
-                    $result[] = $this->strToArray($resultItem['seriesnumber']);
+                    $result[] = $this->stringToArray($resultItem['seriesnumber']);
                 }
             }
         }
-        dump($result); die('ok');
         return $result;
     }
 }
