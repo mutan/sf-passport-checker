@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Exception;
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -139,6 +140,32 @@ class PassportService
         return $text;
     }
 
+    public function arrayToInt(array $data): int
+    {
+        dump($data[0] . $data[1]);
+        dump(intval($data[0] . $data[1], 10)); die('ok');
+        return intval($data[0] . $data[1]);
+    }
+
+    public function strToArray(string $serialnumber): array
+    {
+
+        if (strlen($serialnumber) < 10) {
+            $serialnumber .= str_repeat('0', 10 - strlen($serialnumber));
+        }
+        dump([
+            'series' => substr($serialnumber, 0, 4),
+            'number' => substr($serialnumber, -6, 6)
+        ]); die('ok');
+
+
+        
+        return [
+            'series' => substr($serialnumber, 0, 4),
+            'number' => substr($serialnumber, -6, 6)
+        ];
+    }
+
     /**
      * Проверить массив паспортов на недействительность
      * @param array $data
@@ -146,29 +173,35 @@ class PassportService
      */
     public function check(array $data): array
     {
-
-
-
-
         $result = [];
-        $where = null;
+        $where = '';
         foreach ($data as $item) {
-            if (count($item) != 2) throw new \InvalidArgumentException('Item must have series and number only');
-            list($s, $n) = $item;
-            $s = preg_replace('#\D#', '', $s);
-            $n = preg_replace('#\D#', '', $n);
-            if ($s && $n) $where .= " OR (\"series\" = '$s' AND \"number\" = '$n')";
+            if (count($item) != 2) {
+                throw new InvalidArgumentException('Item must have series and number only');
+            }
+            if (!is_string($item[0]) ||
+                !is_string($item[1]) ||
+                !preg_match('/\d{4}/', $item[0]) ||
+                !preg_match('/\d{6}/', $item[1])
+            ) {
+                throw new InvalidArgumentException('Wrong format: series must be 4-digit string, and number must be 6-digit string');
+            }
+            $serialnumber = $this->arrayToInt($item);
+            dump($serialnumber); die('ok');
+            $where .= " OR (\"serialnumber\" = '$serialnumber')";
         }
         if ($where) {
             $limit = count($data);
             $where = ltrim($where, "OR ");
-            $sql = "SELECT \"series\", \"number\" FROM passport WHERE {$where} LIMIT {$limit}";
+            $sql = "SELECT serialnumber FROM passport WHERE {$where} LIMIT {$limit}";
+            dump($sql); die('ok');
             if ($resultItems = $this->em->getConnection()->fetchAll($sql)) {
                 foreach ($resultItems as $resultItem) {
-                    $result[] = [$resultItem['series'], $resultItem['number']];
+                    $result[] = $this->strToArray($resultItem['serialnumber']);
                 }
             }
         }
+        dump($result); die('ok');
         return $result;
     }
 }

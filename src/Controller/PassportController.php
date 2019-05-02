@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use DateTime;
 use Exception;
+use InvalidArgumentException;
 use App\Service\PassportService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,6 +26,7 @@ class PassportController extends AbstractController
     }
 
     /**
+     * // TODO
      * get [ ["1234", "123456"] ];
      * return [ ["1234","123456"] ];
      * @Route("/check", name="passport_check", methods={"POST"})
@@ -35,29 +37,15 @@ class PassportController extends AbstractController
      */
     public function checkAction(Request $request, PassportService $passportService)
     {
-        $data = $request->request->get("data");
-
-        if (!is_scalar($data)) {
-            throw new Exception('Wrong request format.');
+        $result = $request->getContent();
+        $jsonResult = json_decode($result, true);
+        if (!$jsonResult) {
+            throw new InvalidArgumentException('Not valid json.');
         }
-
-        $data = json_decode($data, true);
-        if (!$data) {
-            throw new Exception('Not valid json.');
+        $data = $jsonResult['data'];
+        if (!is_array($jsonResult)) {
+            throw new InvalidArgumentException('Parameter "data" must be an array.');
         }
-
-        if (!is_array($data)) {
-            throw new Exception('Data must be an array.');
-        }
-
-        /*if (!is_string($series) ||
-            !is_string($number) ||
-            !preg_match('/\d{4}/', $series) ||
-            !preg_match('/\d{6}/', $number)
-        ) {
-            throw new Exception('Wrong format: series must be 4-digit string, and number must be 6-digit string');
-        }*/
-
         $result = $passportService->check($data);
         return $this->json($result);
     }

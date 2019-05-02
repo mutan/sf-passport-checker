@@ -18,8 +18,8 @@ class PassportUpdateCommand extends Command
 {
     use LockableTrait;
 
-    const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
-    const BATCH_INSERT = 20000;
+    protected const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
+    protected const BATCH_INSERT = 20000;
 
     private $em;
     private $logger;
@@ -76,23 +76,23 @@ class PassportUpdateCommand extends Command
                 $this->passportService->setVersion($headers['Last-Modified']);
 
                 /* Download and save file */
-                $this->logger->info('Downloading archive file...');
+                /*-$this->logger->info('Downloading archive file...');
                 $filePointer = fopen($bz2File, 'wb');
                 $client = new Client();
                 $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
                 fclose($filePointer);
                 if (200 != $response->getStatusCode()) {
                     throw new Exception('Expired passports: wrong response code.');
-                }
+                }*/
 
                 /* Extract csv file from archive */
-                $this->logger->info('Extracting archive file...');
+                /*$this->logger->info('Extracting archive file...');
                 $this->bunzip2($bz2File, $csvFile);
                 $this->logger->info('Extracted.');
                 if (file_exists($bz2File)) {
                     unlink($bz2File);
                 }
-                $this->logger->info('Archive file deleted.');
+                $this->logger->info('Archive file deleted.');*/
 
                 $this->executeQuery('ALTER DATABASE passport_checker SET random_page_cost=1.4;');
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
@@ -111,7 +111,7 @@ class PassportUpdateCommand extends Command
                 while ($str = fgets($handle)) {
                     $data = explode(',', trim($str));
                     if (is_numeric($data[0]) && is_numeric($data[1])) {
-                        $passportList[] = intval($data[0] . $data[1]);
+                        $passportList[] = $this->passportService->arrayToInt($data);
                         if (count($passportList) >= self::BATCH_INSERT) {
                             $this->flushPassportData($passportList);
                             $processed += count($passportList);
@@ -131,7 +131,7 @@ class PassportUpdateCommand extends Command
                 $this->em->getConnection()->exec("ALTER TABLE passport_new RENAME TO passport");
                 $this->em->getConnection()->exec("DROP TABLE passport_old");
                 if (file_exists($csvFile)) {
-                    unlink($csvFile);
+                    //unlink($csvFile);
                 }
                 $this->logger->info("Complete $processed records.");
             } else {
