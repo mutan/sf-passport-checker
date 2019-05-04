@@ -70,7 +70,9 @@ class PassportUpdateCommand extends Command
             }
 
             /* Check version without downloading file */
-            if ($headers['Last-Modified'] != $version) {
+            if ($headers['Last-Modified'] == $version) {
+                $this->logger->info('Expired passports file is up to date.');
+            } else {
                 /* Download and save file */
                 $this->logger->info('Downloading archive file...');
                 $filePointer = fopen($bz2File, 'wb');
@@ -98,8 +100,6 @@ class PassportUpdateCommand extends Command
                 /* Update version and progress */
                 $this->passportService->setVersion($headers['Last-Modified']);
                 $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
-            } else {
-                $this->logger->info("Expired passports file's version ");
             }
         }
 
@@ -142,6 +142,7 @@ class PassportUpdateCommand extends Command
             /* Update progress */
             $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
+
         $this->release();
         return true;
     }
