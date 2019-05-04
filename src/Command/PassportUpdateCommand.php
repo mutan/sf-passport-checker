@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use DateTime;
 use Exception;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
@@ -54,7 +53,7 @@ class PassportUpdateCommand extends Command
             return false;
         }
 
-        $this->logger->info('Script started at ' . (new DateTime())->format('Y-m-d H:i:s'));
+        $this->logger->info('Script started.');
 
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
@@ -67,7 +66,7 @@ class PassportUpdateCommand extends Command
         if ($progress == PassportService::PROGRESS_COMPLETED) {
             $headers = get_headers(self::SOURCE_URL, 1);
             if (!is_array($headers) || !array_key_exists('Last-Modified', $headers)) {
-                throw new Exception('Expired passports: wrong header.');
+                throw new Exception('Expired passports file: wrong headers.');
             }
 
             /* Check version without downloading file */
@@ -99,6 +98,8 @@ class PassportUpdateCommand extends Command
                 /* Update version and progress */
                 $this->passportService->setVersion($headers['Last-Modified']);
                 $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
+            } else {
+                $this->logger->info("Expired passports file's version ");
             }
         }
 
