@@ -1,5 +1,9 @@
 monolog:
     handlers:
+        app:
+            type: stream
+            path:  "%kernel.logs_dir%/app.%kernel.environment%.log"
+            level: debug
         main:
             type: fingers_crossed
             action_level: error
