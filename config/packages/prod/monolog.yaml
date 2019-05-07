@@ -4,7 +4,7 @@ monolog:
             type: stream
             path:  "%kernel.logs_dir%/app.%kernel.environment%.log"
             level: debug
-            channels: ['app', 'command']
+            channels: ['app', 'command', '!request']
         main:
             type: fingers_crossed
             action_level: error
