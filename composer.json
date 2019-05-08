@@ -10,6 +10,7 @@
         "ext-iconv": "^7.2",
         "ext-json": "^1.6",
         "guzzlehttp/guzzle": "~6.0",
+        "mutan/api-service-bundle": "*@dev",
         "sentry/sentry": "1.10.0",
         "symfony/console": "4.2.*",
         "symfony/dotenv": "4.2.*",
@@ -69,5 +70,11 @@
             "allow-contrib": false,
             "require": "4.2.*"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../sf-api-service"
+        }
+    ]
 }

@@ -93,6 +93,9 @@
     "monolog/monolog": {
         "version": "1.24.0"
     },
+    "mutan/api-service-bundle": {
+        "version": "dev-master"
+    },
     "nikic/php-parser": {
         "version": "v4.2.1"
     },
