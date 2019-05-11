@@ -31,6 +31,10 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    App\ApiService\:
+      resource: '../src/ApiService/*'
+      tags: ["jsonrpc.api-service"]
+
     App\Command\:
         resource: '../src/Command'
         tags:

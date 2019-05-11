@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3f9e1ebacfdfb9591d0c9445452f1de",
+    "content-hash": "6c3a4ea9c0e7563c27f617c3bb58c6df",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1508,19 +1508,26 @@
         },
         {
             "name": "mutan/api-service-bundle",
-            "version": "dev-master",
+            "version": "1.01",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mutan/sf-api-service.git",
+                "reference": "ffc428f9b25d2fa5496c1b1df3acf69fb1870885"
+            },
             "dist": {
-                "type": "path",
-                "url": "../sf-api-service",
-                "reference": "f716ccbbdc2e3c0530eaf887179ce0733a02d593",
-                "shasum": null
+                "type": "zip",
+                "url": "https://api.github.com/repos/mutan/sf-api-service/zipball/ffc428f9b25d2fa5496c1b1df3acf69fb1870885",
+                "reference": "ffc428f9b25d2fa5496c1b1df3acf69fb1870885",
+                "shasum": ""
             },
             "require": {
+                "ext-json": "^1.6",
                 "php": "^7.2",
                 "symfony/config": "^4.2",
                 "symfony/dependency-injection": "^4.2",
                 "symfony/framework-bundle": "^4.2",
                 "symfony/http-kernel": "^4.2",
+                "symfony/stopwatch": "^4.2",
                 "symfony/yaml": "^4.2"
             },
             "require-dev": {
@@ -1532,11 +1539,7 @@
                     "Mutan\\ApiServiceBundle\\": "src/Mutan/ApiServiceBundle/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Mutan\\ApiServiceBundle\\Tests\\": "src/Mutan/ApiServiceBundle/tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1546,7 +1549,8 @@
                     "email": "akim.now@gmail.com"
                 }
             ],
-            "description": "Api service for Symfony 4"
+            "description": "Api service for Symfony 4",
+            "time": "2019-05-11T19:28:23+00:00"
         },
         {
             "name": "ocramius/package-versions",
@@ -2226,16 +2230,16 @@
         },
         {
             "name": "symfony/contracts",
-            "version": "v1.0.2",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/contracts.git",
-                "reference": "1aa7ab2429c3d594dd70689604b5cf7421254cdf"
+                "reference": "d3636025e8253c6144358ec0a62773cae588395b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/contracts/zipball/1aa7ab2429c3d594dd70689604b5cf7421254cdf",
-                "reference": "1aa7ab2429c3d594dd70689604b5cf7421254cdf",
+                "url": "https://api.github.com/repos/symfony/contracts/zipball/d3636025e8253c6144358ec0a62773cae588395b",
+                "reference": "d3636025e8253c6144358ec0a62773cae588395b",
                 "shasum": ""
             },
             "require": {
@@ -2243,19 +2247,22 @@
             },
             "require-dev": {
                 "psr/cache": "^1.0",
-                "psr/container": "^1.0"
+                "psr/container": "^1.0",
+                "symfony/polyfill-intl-idn": "^1.10"
             },
             "suggest": {
                 "psr/cache": "When using the Cache contracts",
                 "psr/container": "When using the Service contracts",
                 "symfony/cache-contracts-implementation": "",
+                "symfony/event-dispatcher-implementation": "",
+                "symfony/http-client-contracts-implementation": "",
                 "symfony/service-contracts-implementation": "",
                 "symfony/translation-contracts-implementation": ""
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0-dev"
+                    "dev-master": "1.1-dev"
                 }
             },
             "autoload": {
@@ -2290,7 +2297,7 @@
                 "interoperability",
                 "standards"
             ],
-            "time": "2018-12-05T08:06:11+00:00"
+            "time": "2019-04-27T14:29:50+00:00"
         },
         {
             "name": "symfony/debug",
@@ -4362,9 +4369,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "mutan/api-service-bundle": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

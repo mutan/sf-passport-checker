@@ -1,2 +1,2 @@
-mutan_api:
+mt_api:
   logger: '@monolog.logger.api'
