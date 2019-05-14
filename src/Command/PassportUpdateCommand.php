@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use App\Service\PassportService;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,16 +20,19 @@ class PassportUpdateCommand extends Command
 
     protected const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
     protected const BATCH_INSERT = 20000;
+    protected const SW_FIRST = 'first';
 
     private $em;
     private $logger;
     private $passportService;
+    private $stopwatch;
 
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, PassportService $passportService)
     {
         $this->em = $em;
         $this->logger = $logger;
         $this->passportService = $passportService;
+        $this->stopwatch = new Stopwatch();
         parent::__construct();
     }
 
@@ -53,7 +57,9 @@ class PassportUpdateCommand extends Command
             return false;
         }
 
-        $this->logger->info('Script started.');
+        $this->stopwatch->start(self::SW_FIRST);
+
+        $this->log('Script started.', self::SW_FIRST);
 
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
@@ -71,10 +77,10 @@ class PassportUpdateCommand extends Command
 
             /* Check version without downloading file */
             if ($headers['Last-Modified'] == $version) {
-                $this->logger->info('Expired passports file is up to date.');
+                $this->log('Expired passports file is up to date.', self::SW_FIRST);
             } else {
                 /* Download and save file */
-                $this->logger->info('Downloading archive file...');
+                $this->log('Downloading archive file started.', self::SW_FIRST);
                 $filePointer = fopen($bz2File, 'wb');
                 $client = new Client();
                 $response = $client->get(self::SOURCE_URL, ['sink' => $filePointer]);
@@ -82,15 +88,16 @@ class PassportUpdateCommand extends Command
                 if (200 != $response->getStatusCode()) {
                     throw new Exception('Expired passports: wrong response code.');
                 }
+                $this->log('Downloading archive file finished.', self::SW_FIRST);
 
                 /* Extract csv file from archive */
-                $this->logger->info('Extracting archive file...');
+                $this->log('Extracting archive file started.', self::SW_FIRST);
                 $this->bunzip2($bz2File, $csvFile);
-                $this->logger->info('Extracted.');
+                $this->log('Extracting archive file finished.', self::SW_FIRST);
                 if (file_exists($bz2File)) {
                     unlink($bz2File);
                 }
-                $this->logger->info('Archive file deleted.');
+                $this->log('Archive file deleted.', self::SW_FIRST);
 
                 $this->executeQuery('ALTER DATABASE passport SET random_page_cost=1.4;');
                 $this->executeQuery('DROP TABLE IF EXISTS passport_new');
@@ -103,6 +110,7 @@ class PassportUpdateCommand extends Command
             }
         }
 
+        dump(777); die('ok');
         if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
             $this->logger->info('Inserting to database...');
@@ -176,6 +184,22 @@ class PassportUpdateCommand extends Command
         $stmt = $this->em->getConnection()->prepare($sql);
         $stmt->execute();
         return $stmt;
+    }
+
+    private function getStopwatch(): Stopwatch
+    {
+        return $this->stopwatch;
+    }
+
+    private function getDuration($eventName)
+    {
+        $duration = $this->getStopwatch()->getEvent($eventName)->getDuration();
+        return $duration / 1000;
+    }
+
+    private function log($message, $eventName)
+    {
+        $this->logger->info($this->getDuration($eventName) . ' ' . $message);
     }
 
     /**
