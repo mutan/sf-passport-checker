@@ -64,6 +64,7 @@ class PassportUpdateCommand extends Command
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
         $version = $this->passportService->getVersion();
+        $versionNew = '';
         $progress = $this->passportService->getProgress();
         if (!$progress) {
             $progress = $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
@@ -75,8 +76,10 @@ class PassportUpdateCommand extends Command
                 throw new Exception('Expired passports file: wrong headers.');
             }
 
+            $versionNew = $headers['Last-Modified'];
+
             /* Check version without downloading file */
-            if ($headers['Last-Modified'] == $version) {
+            if ($versionNew == $version) {
                 $this->log('Expired passports file is up to date.', self::SW_FIRST);
             } else {
                 /* Download and save file */
@@ -92,7 +95,9 @@ class PassportUpdateCommand extends Command
 
                 /* Extract csv file from archive */
                 $this->log('Extracting archive file started.', self::SW_FIRST);
-                $this->bunzip2($bz2File, $csvFile);
+                if (!$this->bunzip2($bz2File, $csvFile)) {
+                    throw new Exception('Cannot extract archive file.');
+                }
                 $this->log('Extracting archive file finished.', self::SW_FIRST);
                 if (file_exists($bz2File)) {
                     unlink($bz2File);
@@ -104,8 +109,7 @@ class PassportUpdateCommand extends Command
                 $this->executeQuery('CREATE TABLE passport_new (seriesnumber character varying(10) NOT NULL UNIQUE)' );
                 //$this->executeQuery('CREATE INDEX ind_sn ON passport_new USING btree (seriesnumber)');
 
-                /* Update version and progress */
-                $this->passportService->setVersion($headers['Last-Modified']);
+                /* Update progress */
                 $progress = $this->passportService->setProgress(PassportService::PROGRESS_PROCESSING);
             }
         }
@@ -146,7 +150,10 @@ class PassportUpdateCommand extends Command
                 throw new Exception('Unable to open csv file');
             }
 
-            /* Update progress */
+            /* Update version and progress */
+            if ($versionNew) {
+                $this->passportService->setVersion($versionNew);
+            }
             $this->passportService->setProgress(PassportService::PROGRESS_COMPLETED);
         }
 
