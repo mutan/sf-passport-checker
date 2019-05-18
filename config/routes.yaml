@@ -1,4 +1,4 @@
 _mt_api:
   resource: '@MutanApiServiceBundle/Resources/config/routes.yaml'
   prefix: 'api/v1'
-  method: [ POST ]
+  methods: [ POST ]

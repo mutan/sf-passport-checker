@@ -147,10 +147,7 @@ class PassportService
 
     public function stringToArray(string $seriesnumber): array
     {
-        return [
-            'series' => substr($seriesnumber, 0, 4),
-            'number' => substr($seriesnumber, -6, 6)
-        ];
+        return [substr($seriesnumber, 0, 4), substr($seriesnumber, -6, 6)];
     }
 
     /**
