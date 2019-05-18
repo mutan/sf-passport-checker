@@ -1,7 +1,4 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
-
 _mt_api:
   resource: '@MutanApiServiceBundle/Resources/config/routes.yaml'
   prefix: 'api/v1'
+  method: [ POST ]
