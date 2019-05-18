@@ -116,7 +116,7 @@ class PassportUpdateCommand extends Command
 
         if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
-            $this->logger->info('Inserting to database...');
+            $this->log('Inserting to database...', self::SW_FIRST);
             if (($handle = fopen($csvFile, 'r')) !== false) {
                 fgets($handle); // skip first line with columns headers
                 $passportList = [];
@@ -145,7 +145,7 @@ class PassportUpdateCommand extends Command
                 if (file_exists($csvFile)) {
                     unlink($csvFile);
                 }
-                $this->logger->info("Complete $processed records.");
+                $this->log("Complete $processed records.", self::SW_FIRST);
             } else {
                 throw new Exception('Unable to open csv file');
             }
@@ -200,7 +200,17 @@ class PassportUpdateCommand extends Command
     private function getDuration($eventName)
     {
         $duration = $this->getStopwatch()->getEvent($eventName)->getDuration();
-        return $duration / 1000;
+
+        $uSec = $duration % 1000;
+        $duration = floor($duration / 1000);
+
+        $seconds = $duration % 60;
+        $duration = floor($duration / 60);
+
+        $minutes = $duration % 60;
+        $duration = floor($duration / 60);
+
+        return sprintf('%02d:%02d:%02d.%03d', $duration, $minutes, $seconds, $uSec);
     }
 
     private function log($message, $eventName)
