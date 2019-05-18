@@ -197,7 +197,7 @@ class PassportUpdateCommand extends Command
         return $this->stopwatch;
     }
 
-    private function getDuration($eventName)
+    private function getFormattedDuration($eventName)
     {
         $duration = $this->getStopwatch()->getEvent($eventName)->getDuration();
 
@@ -215,7 +215,7 @@ class PassportUpdateCommand extends Command
 
     private function log($message, $eventName)
     {
-        $this->logger->info($this->getDuration($eventName) . ' ' . $message);
+        $this->logger->info($this->getFormattedDuration($eventName) . ' ' . $message);
     }
 
     /**
