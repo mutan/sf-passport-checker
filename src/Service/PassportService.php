@@ -34,6 +34,14 @@ class PassportService
     }
 
     /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
+    }
+
+    /**
      * Конвертирует строку из константы DATA_PATH в валидный путь для текущей ОС
      * @return string
      * @throws Exception
@@ -42,7 +50,7 @@ class PassportService
     {
         $pieces = array_filter(explode('/', self::DATA_PATH));
         $path = $this->projectDir . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $pieces) . DIRECTORY_SEPARATOR;
-        if (!file_exists($path) ){
+        if (!file_exists($path)) {
             if (!mkdir($path, 0755, true)) {
                 throw new Exception('Expired passports: cannot create data directory.');
             }

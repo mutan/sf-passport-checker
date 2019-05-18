@@ -53,13 +53,13 @@ class PassportUpdateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         if (!$this->lock()) {
-            $this->logger->info('The command is already running in another process.');
+            $this->logger->info('The command is already running in another process. Terminated.');
             return false;
         }
 
         $this->stopwatch->start(self::SW_FIRST);
-
         $this->log('Script started.', self::SW_FIRST);
+        $this->passportService->setLogger($this->logger);
 
         $bz2File = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_BZ2_FILE);
         $csvFile = $this->passportService->getFile(PassportService::EXPIRED_PASSPORTS_SCV_FILE);
@@ -110,7 +110,6 @@ class PassportUpdateCommand extends Command
             }
         }
 
-        dump(777); die('ok');
         if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
             $this->logger->info('Inserting to database...');
