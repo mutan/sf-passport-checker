@@ -5,7 +5,7 @@ monolog:
             type: stream
             path:  "%kernel.logs_dir%/app.%kernel.environment%.log"
             level: debug
-            channels: ['!request', 'app', 'command']
+            channels: ['app', 'command']
         main:
             type: fingers_crossed
             action_level: error
@@ -19,7 +19,7 @@ monolog:
         sentry:
             type:  raven
             dsn:   '%env(SENTRY_DSN)%'
-            level: notice
+            level: debug
         streamed:
             type:  stream
             path:  "%kernel.logs_dir%/%kernel.environment%.log"
