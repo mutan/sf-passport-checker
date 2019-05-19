@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 use App\Service\PassportService;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Stopwatch\Stopwatch;
+use App\Service\BaseStopwatch as Stopwatch;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,8 +24,8 @@ class PassportUpdateCommand extends Command
 
     private $em;
     private $logger;
-    private $passportService;
     private $stopwatch;
+    private $passportService;
 
     public function __construct(EntityManagerInterface $em, LoggerInterface $logger, PassportService $passportService)
     {
@@ -192,30 +192,9 @@ class PassportUpdateCommand extends Command
         return $stmt;
     }
 
-    private function getStopwatch(): Stopwatch
-    {
-        return $this->stopwatch;
-    }
-
-    private function getFormattedDuration($eventName)
-    {
-        $duration = $this->getStopwatch()->getEvent($eventName)->getDuration();
-
-        $uSec = $duration % 1000;
-        $duration = floor($duration / 1000);
-
-        $seconds = $duration % 60;
-        $duration = floor($duration / 60);
-
-        $minutes = $duration % 60;
-        $duration = floor($duration / 60);
-
-        return sprintf('%02d:%02d:%02d.%03d', $duration, $minutes, $seconds, $uSec);
-    }
-
     private function log($message, $eventName)
     {
-        $this->logger->info($this->getFormattedDuration($eventName) . ' ' . $message);
+        $this->logger->info($this->stopwatch->getFormattedDuration($eventName) . ' ' . $message);
     }
 
     /**
@@ -224,7 +203,7 @@ class PassportUpdateCommand extends Command
      * @param string $out
      * @desc uncompressing the file with the bzip2-extension
      */
-    function bunzip2 ($in, $out)
+    function bunzip2($in, $out)
     {
         if (!file_exists ($in) || !is_readable ($in)) {
             return false;
