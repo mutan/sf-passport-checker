@@ -116,6 +116,7 @@ class PassportUpdateCommand extends Command
 
         if ($progress != PassportService::PROGRESS_COMPLETED) {
             $processed = 0;
+            $batch = 1;
             $this->log('Inserting to database...', self::SW_FIRST);
             if (($handle = fopen($csvFile, 'r')) !== false) {
                 fgets($handle); // skip first line with columns headers
@@ -125,8 +126,11 @@ class PassportUpdateCommand extends Command
                     if (is_numeric($data[0]) && is_numeric($data[1])) {
                         $passportList[] = $this->passportService->arrayToString($data);
                         if (count($passportList) >= self::BATCH_INSERT) {
+                            $this->log(sprintf('Batch %04d insert started.', $batch), self::SW_FIRST);
                             $this->flushPassportData($passportList);
+                            $this->log(sprintf('Batch %04d insert finished.', $batch), self::SW_FIRST);
                             $processed += count($passportList);
+                            $batch++;
                             $passportList = [];
                             $output->write('.');
                         }

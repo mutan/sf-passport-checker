@@ -5,6 +5,7 @@ namespace App\ApiService;
 use DateTime;
 use Exception;
 use App\Service\PassportService;
+use App\Exception\ServiceMessageException;
 
 class PassportApiService
 {
@@ -22,6 +23,9 @@ class PassportApiService
      */
     public function version()
     {
+        if (!$this->passportService->getVersion()) {
+            throw new ServiceMessageException('Empty version');
+        }
         $version = new DateTime($this->passportService->getVersion());
         return $version->format('Y-m-d H:i:s');
     }
