@@ -19,7 +19,7 @@ class PassportUpdateCommand extends Command
     use LockableTrait;
 
     protected const SOURCE_URL = 'https://guvm.mvd.ru/upload/expired-passports/list_of_expired_passports.csv.bz2';
-    protected const BATCH_INSERT = 20000;
+    protected const BATCH_INSERT = 100000;
     protected const SW_FIRST = 'first';
 
     private $em;
@@ -126,13 +126,11 @@ class PassportUpdateCommand extends Command
                     if (is_numeric($data[0]) && is_numeric($data[1])) {
                         $passportList[] = $this->passportService->arrayToString($data);
                         if (count($passportList) >= self::BATCH_INSERT) {
-                            $this->log(sprintf('Batch %04d insert started.', $batch), self::SW_FIRST);
+                            $this->log(sprintf('Inserting batch %04d', $batch), self::SW_FIRST);
                             $this->flushPassportData($passportList);
-                            $this->log(sprintf('Batch %04d insert finished.', $batch), self::SW_FIRST);
                             $processed += count($passportList);
                             $batch++;
                             $passportList = [];
-                            $output->write('.');
                         }
                     }
                 }
